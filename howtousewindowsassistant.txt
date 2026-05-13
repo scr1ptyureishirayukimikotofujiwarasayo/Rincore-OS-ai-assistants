@@ -1,0 +1,93 @@
+Local OS AI Assistant for Windows
+
+A Python-based AI assistant that can directly execute PowerShell and CMD commands on your Windows machine.
+It works with local LLMs (Ollama, LM Studio) or cloud APIs (OpenAI, Anthropic, custom endpoints).
+The assistant can also search the web, run multi-step OS tasks automatically, and log all command executions.
+
+    ⚠️ Safety first – Every command requires your confirmation before execution.
+    The "admin mode" selection is informational only; the script does not attempt to elevate privileges.
+
+Features
+
+    🤖 AI‑powered OS automation – Describe what you want, and the assistant generates the correct command.
+
+    🖥️ Direct command execution – !ps <command> or !cmd <command> runs immediately.
+
+    🔍 Automatic web search – When you ask a factual question (no OS action detected).
+
+    📜 Command logging – All executed commands and outputs are saved to command_log.txt.
+
+    🔄 Multi‑step chaining – The AI can run a command, read the output, and decide the next step automatically.
+
+    🧠 Supports local LLMs – Works with Ollama (port 11434) and LM Studio (port 1234) out of the box.
+
+Requirements
+
+    Windows (PowerShell and CMD must be available)
+
+    Python 3.7+
+
+    pip (Python package manager)
+
+pip install requests duckduckgo-search
+
+  If you plan to use Ollama or LM Studio, you need to have the respective software installed and running before starting the assistant.
+
+  Setup
+
+    Download the script – Save it as os_assistant.py (or use the provided file).
+
+    Choose your AI provider:
+    Provider	What you need
+    Ollama	Ollama installed, and at least one model pulled (ollama pull llama3.2). The server must be running (default http://localhost:11434).
+    LM Studio	LM Studio installed, a model loaded, and the local inference server enabled (default port 1234).
+    API Key	An API key for OpenAI, Anthropic, or any OpenAI‑compatible endpoint (e.g., Groq, Together.ai, local vLLM). You also need the base URL.
+
+    Run the script from a terminal (Command Prompt, PowerShell, or VS Code terminal): python os_assistant.py
+
+Usage Guide
+First launch
+
+    Admin mode – Type y or n. This only affects how the AI thinks about permissions (e.g., installing software). It does not actually run commands as Administrator.
+
+    Provider selection – Choose 1 (Ollama), 2 (LM Studio), or 3 (API).
+
+        For Ollama/LM Studio: select a model from the list.
+
+        For API: enter provider name, API key, and base URL. The script tries to fetch available models (or you can enter one manually).
+
+    The chat starts. You will see a prompt You:
+
+Chat commands
+Command	Action
+exit	Quit the assistant.
+/toggle	Turn automatic web search on/off.
+/search <query>	Force a web search for <query> and send the results to the AI.
+!ps <command>	Execute <command> directly in PowerShell (no AI involved).
+!cmd <command>	Execute <command> directly in CMD (no AI involved).
+Normal conversation
+
+Just type what you want the assistant to do – for example:You: Show me all text files in the current folder
+The AI will produce a command inside a code block with the language powershell or cmd.
+You will be asked before execution:⚠️  Command to execute (powershell):
+    Get-ChildItem -Filter *.txt
+Execute? (y/n):
+  After you confirm, the output is shown, and the AI analyses it to continue (or finish) the task.
+  Example session
+
+
+You: Create a new folder called "Projects" on my desktop
+
+Assistant: ```powershell
+New-Item -Path "$env:USERPROFILE\Desktop\Projects" -ItemType Directory
+
+Execute? (y/n): y
+
+  PowerShell Output:
+Directory: C:\Users\YourName\Desktop
+Mode LastWriteTime Length Name
+
+
+Python Packages
+
+Install the required packages:
