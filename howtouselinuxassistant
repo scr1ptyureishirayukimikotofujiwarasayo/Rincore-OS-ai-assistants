@@ -1,0 +1,109 @@
+Linux AI Assistant – README
+
+A command‑line AI assistant for Linux that executes system commands, searches the web, and works with various LLM backends (Ollama, LM Studio, or any OpenAI‑compatible API).
+Features
+
+    Autonomous OS control – The AI writes and runs bash commands directly.
+
+    Local or cloud LLMs – Supports Ollama, LM Studio, or custom API (OpenAI, Anthropic, etc.).
+
+    Web search – Automatic or manual DuckDuckGo search for contextual answers.
+
+    Sudo mode – Optionally prefix commands with sudo.
+
+    Command logging – All executed commands + output are saved to ~/command_log.txt.
+
+    Bash fallback – Type !bash <command> to run a command manually.
+
+Requirements
+
+    Linux (tested on modern distributions)
+
+    Python 3.8+
+
+    pip install requests duckduckgo-search
+
+Optional (depending on chosen provider):
+
+    Ollama running locally with at least one model pulled.
+
+    LM Studio with local server enabled (default port 1234).
+
+    API key + base URL for OpenAI, Anthropic, or any compatible endpoint.
+
+Installation
+
+    Save the script as linux_ai_assistant.py.
+
+    Install Python dependencies:
+    bash
+
+    pip install requests duckduckgo-search
+
+    Make the script executable (optional):
+    bash
+
+    chmod +x linux_ai_assistant.py
+
+Usage
+
+Run the script:
+bash
+
+python3 linux_ai_assistant.py
+
+You will be guided through:
+
+    Sudo mode – type y if you want the assistant to prefix commands with sudo.
+
+    AI Provider – choose from:
+
+        1 Ollama (local, requires Ollama service)
+
+        2 LM Studio (local, requires server running)
+
+        3 API keys (enter provider name, API key, and base URL)
+
+    Model selection – pick a model from the list (or enter manually for API).
+
+After setup, the chat loop starts.
+Chat commands
+Command	Action
+exit	Quit the assistant.
+/toggle	Enable / disable automatic web search.
+/search <query>	Force a web search (bypass auto‑search rules).
+!bash <command>	Run a bash command manually (with confirmation).
+How the assistant works
+
+    The assistant never instructs you – it outputs bash commands inside ```bash ... ``` blocks.
+
+    Every such command is presented to you for confirmation before execution.
+
+    After a command runs, its output is sent back to the AI so it can continue the task.
+
+    The AI can chain multiple commands in one response.
+
+Logging
+
+All executed commands (success/failure, stdout/stderr, timestamp) are appended to ~/command_log.txt.
+Examples
+
+Update package list
+User: update apt
+Assistant: ```bash sudo apt update ``` → you confirm → assistant reads output.
+
+Search the web
+User: what is the latest Linux kernel version?
+Assistant auto‑searches DuckDuckGo and answers.
+
+Manual bash
+User: !bash ls -la → command runs, output is shown.
+Notes
+
+    Web search requires internet access; if none is detected, auto‑search is disabled.
+
+    The AI’s system prompt enforces autonomous behaviour – it will always output commands, not ask you to type them.
+
+    For API providers, the script expects an OpenAI‑compatible /v1/chat/completions endpoint.
+
+    Be careful when granting sudo rights – the assistant may delete or modify system files if you confirm such commands.
