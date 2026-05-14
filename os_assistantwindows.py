@@ -259,7 +259,7 @@ def main():
 
         if provider == "ollama":
             url = "http://localhost:11434/api/chat"
-            payload = {"model": model, "messages": messages, "stream": False, "options": {"num_predict": 512}}
+            payload = {"model": model, "messages": messages, "stream": False, "options": {"num_predict": 1024}}
             try:
                 resp = requests.post(url, json=payload, timeout=60)
                 if resp.status_code == 200:
@@ -272,7 +272,7 @@ def main():
         elif provider == "lmstudio":
             url = f"{config['base_url']}/v1/chat/completions"
             headers = {"Content-Type": "application/json"}
-            payload = {"model": model, "messages": messages, "stream": False, "max_tokens": 512}
+            payload = {"model": model, "messages": messages, "stream": False, "max_tokens": 1024}
             try:
                 resp = requests.post(url, json=payload, headers=headers, timeout=60)
                 if resp.status_code == 200:
@@ -288,7 +288,7 @@ def main():
                 "Content-Type": "application/json",
                 "Authorization": f"Bearer {config['api_key']}"
             }
-            payload = {"model": model, "messages": messages, "stream": False, "max_tokens": 512}
+            payload = {"model": model, "messages": messages, "stream": False, "max_tokens": 1024}
             try:
                 resp = requests.post(url, json=payload, headers=headers, timeout=60)
                 if resp.status_code == 200:
@@ -305,17 +305,17 @@ def main():
         print("Type 'exit' to quit, '/search <query>' to force a web search, '/toggle' to enable/disable auto-search")
         print("Type '!ps <command>' for direct PowerShell execution or '!cmd <command>' for direct CMD execution")
         messages = []
+        cwd_state = {"path": os.path.expanduser("~")}
         system_prompt = (
-            "You are an autonomous OS assistant. You EXECUTE actions directly — never instruct the user how to do things themselves.\n"
-            "When asked to perform ANY system task, you MUST respond with the exact shell command in a code block.\n"
-            "ALWAYS use ```powershell or ```cmd blocks. Never describe steps in plain text instead of a command.\n"
-            "After a command runs, analyse the output and take the next action automatically if needed.\n"
-            "Only ask the user a question if genuinely ambiguous (e.g. which drive, which file). Otherwise act.\n\n"
-            "CONTEXT RULES:\n"
-            "- Summarise completed multi-step task results into one line before continuing.\n"
-            "- Do not repeat command output verbatim in your reply; reference it briefly.\n"
-            "- If a previous command output is already in history, do not re-describe it.\n\n"
-            "STEP-BY-STEP reasoning is internal only — output the command, not your reasoning."
+            "You are an autonomous Windows OS agent. You EXECUTE tasks — never instruct the user.\n"
+            "For EVERY OS task, emit one or more shell commands in ```powershell or ```cmd blocks.\n"
+            "Each block must be a single atomic command. Use multiple blocks for multi-step tasks.\n"
+            "After each command's output is returned, emit the next command or confirm completion.\n"
+            "Include [cwd] context when constructing paths — always use absolute paths.\n"
+            "If a command fails, diagnose from the error output and emit a corrected command.\n"
+            "Only ask the user a question if truly ambiguous (e.g. missing filename, ambiguous target).\n"
+            "Never output steps as prose — always as executable code blocks.\n"
+            "STEP-BY-STEP reasoning is internal only."
         )
         messages.append({"role": "system", "content": system_prompt})
 
@@ -349,7 +349,7 @@ def main():
                 # Direct PowerShell command execution
                 cmd = user_input[4:].strip()
                 if confirm_action(cmd, "powershell"):
-                    output, success = run_os_command(cmd, "powershell", config.get("is_admin", False))
+                    output, success = run_os_command(cmd, "powershell", config.get("is_admin", False), cwd=cwd_state["path"])
                     print(f"\nPowerShell Output:\n{output}")
                     messages.append({"role": "user", "content": f"[ps:{cmd[:40]}]\n{trim_output(output)}"})
                     response = generate_response(messages, config)
@@ -362,7 +362,7 @@ def main():
                 # Direct CMD command execution
                 cmd = user_input[5:].strip()
                 if confirm_action(cmd, "cmd"):
-                    output, success = run_os_command(cmd, "cmd", config.get("is_admin", False))
+                    output, success = run_os_command(cmd, "cmd", config.get("is_admin", False), cwd=cwd_state["path"])
                     print(f"\nCMD Output:\n{output}")
                     messages.append({"role": "user", "content": f"[cmd:{cmd[:40]}]\n{trim_output(output)}"})
                     response = generate_response(messages, config)
@@ -391,7 +391,8 @@ def main():
                         else:
                             print("No search results found.")
 
-            messages.append({"role": "user", "content": user_input})
+            enriched_input = f"[cwd: {cwd_state['path']}]\n{user_input}"
+            messages.append({"role": "user", "content": enriched_input})
             
             if len(messages) % 8 == 0 and len(messages) > 1:
                 messages.append({"role": "user", "content": "[Sys] Be autonomous. Always use ```powershell/```cmd blocks. Never instruct user to run commands."})
@@ -414,42 +415,40 @@ def main():
                     if messages[i]["role"] == "assistant" and len(messages[i]["content"]) > 60:
                         messages[i]["content"] = messages[i]["content"][:60] + "…"
             
-            # After getting AI response, check for embedded commands
-            # Look for pattern: ```powershell ... ``` or ```cmd ... ```
-            ps_match = re.search(r'```powershell\n(.*?)\n```', response, re.DOTALL | re.IGNORECASE)
-            cmd_match = re.search(r'```cmd\n(.*?)\n```', response, re.DOTALL | re.IGNORECASE)
-            if ps_match:
-                cmd = ps_match.group(1).strip()
-                print(f"\nAssistant proposes PowerShell command:\n{cmd}")
-                if confirm_action(cmd, "powershell"):
-                    output, success = run_os_command(cmd, "powershell", config.get("is_admin", False))
-                    # Append result as a system message so AI can continue
-                    messages.append({"role": "user", "content": f"[out]\n{trim_output(output)}"})
-                    # Generate a follow-up response to incorporate the output
-                    response = generate_response(messages, config)
-                    print(f"\nAssistant: {response}")
-                    messages.append({"role": "assistant", "content": response})
-                    # Auto-chain: check if follow-up response contains another command
-                    ps_chain = re.search(r'```powershell\n(.*?)\n```', response, re.DOTALL | re.IGNORECASE)
-                    if ps_chain:
-                        chain_cmd = ps_chain.group(1).strip()
-                        print(f"\nAssistant proposes follow-up command:\n{chain_cmd}")
-                        if confirm_action(chain_cmd, "powershell"):
-                            output, success = run_os_command(chain_cmd, "powershell", config.get("is_admin", False))
-                            messages.append({"role": "user", "content": f"[System] Follow-up output:\n{trim_output(output)}"})
-                else:
-                    messages.append({"role": "user", "content": "[System] User declined to execute the command."})
-            if cmd_match:
-                cmd = cmd_match.group(1).strip()
-                print(f"\nAssistant proposes CMD command:\n{cmd}")
-                if confirm_action(cmd, "cmd"):
-                    output, success = run_os_command(cmd, "cmd", config.get("is_admin", False))
-                    messages.append({"role": "user", "content": f"[out]\n{trim_output(output)}"})
-                    response = generate_response(messages, config)
-                    print(f"\nAssistant: {response}")
-                    messages.append({"role": "assistant", "content": response})
-                else:
-                    messages.append({"role": "user", "content": "[System] User declined to execute the command."})
+            def extract_and_run_commands(response, messages, config, depth=0, max_depth=5):
+                """Recursively extract and execute all shell commands from a response."""
+                if depth >= max_depth:
+                    return messages
+                ps_blocks = re.findall(r'```powershell\n(.*?)\n```', response, re.DOTALL | re.IGNORECASE)
+                cmd_blocks = re.findall(r'```cmd\n(.*?)\n```', response, re.DOTALL | re.IGNORECASE)
+                all_commands = [("powershell", c.strip()) for c in ps_blocks] + [("cmd", c.strip()) for c in cmd_blocks]
+                if not all_commands:
+                    return messages
+                for shell_type, cmd in all_commands:
+                    print(f"\nAssistant proposes ({shell_type}):\n{cmd}")
+                    if confirm_action(cmd, shell_type):
+                        output, success = run_os_command(cmd, shell_type, config.get("is_admin", False), cwd=cwd_state["path"])
+                        # Detect directory change from cd/Set-Location commands
+                        cd_match = re.match(r'^(?:Set-Location|cd|chdir)\s+"?(.+?)"?\s*$', cmd, re.IGNORECASE)
+                        if cd_match and success:
+                            new_path = cd_match.group(1).strip()
+                            if os.path.isabs(new_path):
+                                cwd_state["path"] = new_path
+                            else:
+                                cwd_state["path"] = os.path.normpath(os.path.join(cwd_state["path"], new_path))
+                        print(f"\n[{shell_type} output]\n{output}")
+                        messages.append({"role": "user", "content": f"[out:{success}]\n{trim_output(output)}"})
+                        if not success:
+                            messages.append({"role": "user", "content": "[System] The last command FAILED. Diagnose and provide a corrected command."})
+                        follow_up = generate_response(messages, config)
+                        print(f"\nAssistant: {follow_up}")
+                        messages.append({"role": "assistant", "content": follow_up})
+                        messages = extract_and_run_commands(follow_up, messages, config, depth + 1, max_depth)
+                    else:
+                        messages.append({"role": "user", "content": f"[System] User declined: {cmd[:60]}"})
+                return messages
+
+            messages = extract_and_run_commands(response, messages, config)
 
     # Start the chat
     chat_loop(config)
