@@ -1,7 +1,6 @@
-# 🖥️ AI Assistant — Linux · Windows · macOS
+# AI Assistant — Linux · Windows · macOS
 
-A terminal-based AI coding companion that connects to any LLM and can run commands, control a browser, automate your desktop, and test scripts in a sandbox — across all three major operating systems.
-
+A terminal-based AI coding companion that connects to any LLM and can run commands, control a browser, automate your desktop, test programs, self-diagnose and fix errors, and more — across all three major operating systems.
 
 ---
 
@@ -25,15 +24,22 @@ On first run you'll be guided through picking an AI provider and model.
 
 | Capability | Description |
 |---|---|
-| **Chat + Code** | Natural language conversation with the AI, code block execution, auto-fix on errors |
+| **Chat + Code** | Natural language conversation, code block execution, auto-fix on errors |
+| **Chat Mode** | Pure conversation mode (`/chat`) — no code, no tools, just talk |
 | **Browser Control** | Full Playwright-powered browser — navigate, click, type, extract data, take screenshots |
 | **Desktop Automation** | Mouse, keyboard, and window control via pyautogui (`/autotask` mode) |
+| **Program Testing** | Open any program and have the AI test its functionality (`/test`) |
+| **Program Automation** | Use any desktop program to accomplish a task (`/automate`) |
 | **Autonomous Build** | AI plans, writes code, executes, debugs — no confirmation needed (`/build`, `/fullyauto`) |
+| **Full Autonomy** | AI chooses the right tool (search, browse, autotask, test, automate, code) for each step |
 | **Sandbox Testing** | Isolated temporary directory for testing scripts before running them for real (`/sandbox`) |
 | **Structured Plans** | Break complex tasks into numbered steps, track progress (`/plan`, `/status`) |
 | **Web Search** | Live DuckDuckGo search with auto-updating library — triggered by the AI or manually |
-| **Command Logging** | Every shell command is logged with timestamp, exit code, and full output |
-| **Save & Restore** | Export/import conversation state as JSON — store on any cloud drive |
+| **Self-Fixing** | AI diagnoses crash/error logs and auto-executes fixes (`/reviewerrorlogs`, `/selffix`) |
+| **Anti-Crash** | Auto-recovers from errors — logs, resets state, restarts up to 3 times before exiting |
+| **Command Logging** | Every shell command logged with timestamp, exit code, and full output |
+| **Error Logging** | All crashes and unhandled errors logged to `error_logs/` for diagnosis |
+| **Cleanup** | `/cleanup` command or `cleanup.sh`/`cleanup.bat` to clear all logs for Git
 
 ---
 
@@ -68,20 +74,30 @@ pip install airllm bitsandbytes   # optional for 4-bit
 | Command | Description |
 |---|---|
 | `/help` | Show help |
+| `/chat [topic]` | Pure conversation mode — no code, no tools. `exit` to leave |
 | `/toggle` | Toggle auto web search |
 | `/search <q>` | Force a web search |
 | `/auto` | Toggle auto-execution (skip confirmations) |
 | `/logs [N]` | Show last N command logs |
-| `/clearcommandlogs` | Delete all logs |
+| `/clearcommandlogs` | Delete all command logs |
+| `/clearerrorlogs` | Delete all error logs |
+| `/cleanup` | Clear BOTH command and error logs (Git-ready) |
 | `/review` | AI inspects recent logs for mistakes |
+| `/reviewerrorlogs` | AI diagnoses crash/error logs AND auto-executes fixes |
+| `/selffix` | Aggressive self-fixing — scans all logs, auto-diagnoses and fixes across 5 turns |
 | **Modes** | |
 | `/build <desc>` | Auto-build — AI writes + executes autonomously |
-| `/fullyauto [goal]` | Full autonomy — AI controls everything |
+| `/fullyauto [goal]` | Full autonomy — AI controls ALL tools (search, browse, autotask, test, automate, code) |
 | `/browser [--visible] [url]` | Browser automation (Playwright) |
 | `/autotask [program]` | Desktop automation (mouse/keyboard) |
+| `/test <program>` | Open a program and test its functionality |
+| `/automate <program> <task>` | Open a program and automate a task with it |
 | `/sandbox [goal]` | Isolated test environment |
 | `/plan <goal>` | Structured step-by-step plan |
 | `/status` | Show plan progress |
+| `/changemodel` | Switch the active model |
+| `/mainmenu` | Reselect AI provider, fresh session |
+| `/resetassistant` | Clear logs, wipe conversation history |
 | `exit` | Quit the assistant |
 
 ### Direct Commands
@@ -115,8 +131,10 @@ pip install airllm bitsandbytes   # optional for 4-bit
 | Shell | `bash` (`!bash`) | `powershell` (`!ps`) or `cmd` (`!cmd`) | `zsh` (`!bash`) |
 | Package hints | `apt` | `winget` / `choco` | `brew` |
 | Sudo prompt | Yes | No (admin handled by shell) | Yes |
-| Autotask | pyautogui | pyautogui + pygetwindow | pyautogui |
+| Autotask | pyautogui | pyautogui + pygetwindow | pyautogui (needs accessibility permissions) |
 | Paths | `/home/` | `C:\Users\` | `/Users/` |
+| Cleanup script | `cleanup.sh` | `cleanup.bat` | `cleanup.sh` |
+| Anti-crash | Yes (3 retries) | Yes (3 retries) | Yes (3 retries) |
 
 ---
 
@@ -124,22 +142,26 @@ pip install airllm bitsandbytes   # optional for 4-bit
 
 ```
 assistant/
-├── main.py                  # Entry point + chat loop
-├── executor.py              # OS command execution
+├── main.py                  # Entry point + chat loop + all mode handlers
+├── executor.py              # OS command execution + logging
 ├── browser_agent.py         # Playwright browser automation
 ├── autotask_agent.py        # Mouse/keyboard/window control
 ├── planner.py               # Structured task planning
-├── save_load.py             # Export/import conversation state
+├── cleanup.sh / cleanup.bat # Clear all logs for Git-ready state
 ├── requirements.txt
 ├── COMMANDS.txt
 ├── MODEL_RECOMMENDATIONS.md
+├── .gitignore
 ├── command_logs/            # Per-command structured logs
-│   └── .gitkeep
+├── error_logs/              # Crash and unhandled error logs
+├── autotask_screenshots/    # Desktop automation screenshots
+├── browser_screenshots/     # Browser automation screenshots
 └── assistant_core/
     ├── __init__.py
     ├── config.json          # Auto-update settings
     ├── llm.py               # LLM communication (7 providers)
     ├── provider.py          # Provider selection + model management
+    ├── platform_utils.py    # OS detection, shell config
     ├── search.py            # DuckDuckGo search
     ├── search_engine.py     # Search with auto-update
     └── update_manager.py    # PyPI version checker
