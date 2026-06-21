@@ -99,7 +99,6 @@ Models are grouped by knowledge freshness. For OS automation, prefer models unde
 | **Gemini 2.5 Pro** | Google (via OpenRouter) | Unknown | Dense | Strong reasoning, 1M context |
 | **Gemini 2.5 Flash** | Google (via OpenRouter) | Unknown | Dense | Fast, cheap, good context handling |
 | **Gemini 2.5 Flash Thinking** | Google (via OpenRouter) | Unknown | Dense | Flash with chain-of-thought — fast + reasoning |
-| **GPT-4.1** | OpenAI | Unknown | Dense | Updated GPT-4 with recent knowledge, better coding |
 | **Grok 3** | xAI (via OpenRouter) | Unknown | MoE | Strong reasoning, very current, large context |
 | **DeepSeek-V3** | DeepSeek | ~660B | MoE | Very large MoE, competitive with top closed models, cheap |
 | **Qwen3-Coder-480B** | Alibaba (via OpenRouter) | 480B | Dense | Largest open coding model — excellent output quality |
@@ -125,6 +124,7 @@ These models have fixed, older knowledge cutoffs. Verify any commands they sugge
 | **Mixtral 8x22B** | Mistral (via OpenRouter) | 141B | MoE | 2024 | Excellent cost/quality, but verify current packages |
 | **DBRX 132B** | Databricks (via OpenRouter) | 132B | MoE | 2024 | Strong open MoE, but older knowledge |
 | **GPT-4o** | OpenAI | Unknown | Dense | Late 2023 | Strong generalist, but frequently wrong about current APIs/libs |
+| **GPT-4.1** | OpenAI | Unknown | Dense | 2024 | Better coding than GPT-4o, but knowledge is still aging |
 | **GPT-4o-mini** | OpenAI | Unknown | Dense | Late 2023 | Cheap but dated — avoid for any task involving modern tooling |
 | **Llama 3.3 70B** | Meta (via OpenRouter) | 70B | Dense | Late 2023 | Strong open model, but badly outdated for current work |
 
@@ -147,11 +147,11 @@ OS automation relies on current information: package versions, API endpoints, CL
 - Be unaware of new language features, framework APIs, or security practices
 - Fail silently because it doesn't know what it doesn't know
 
-**Current knowledge models (2025+) — use these for automation:**
-Claude Sonnet 4, Claude Opus 4, DeepSeek-V4 Pro, DeepSeek-R1-0528, Gemini 2.5 Pro, Gemini 2.5 Flash, GPT-4.1, Grok 3, DeepSeek-V3, Qwen3-Coder-480B, Qwen3-235B, Llama 4 Maverick, Claude 3.5 Sonnet, Codestral, Phi-4, Command R+
+**Current knowledge models — use these for automation:**
+Claude Sonnet 4, Claude Opus 4, DeepSeek-V4 Pro, DeepSeek-R1-0528, Gemini 2.5 Pro, Gemini 2.5 Flash, Grok 3, DeepSeek-V3, Qwen3-Coder-480B, Qwen3-235B, Llama 4 Maverick, Claude 3.5 Sonnet, Codestral, Phi-4, Command R+
 
 **Dated models — avoid for any task involving modern tooling:**
-GPT-4o (late 2023), GPT-4o-mini (late 2023), Llama 3.3 70B (late 2023), DeepSeek-R1 (2024), Mixtral 8x22B (2024), Mistral Large 2 (2024), DBRX 132B (2024) — these will frequently suggest outdated commands, wrong package names, and deprecated APIs. Only use them for pure logic/debugging where current information doesn't matter.
+GPT-4.1 (2024), GPT-4o (late 2023), GPT-4o-mini (late 2023), Llama 3.3 70B (late 2023), DeepSeek-R1 (2024), Mixtral 8x22B (2024), Mistral Large 2 (2024), DBRX 132B (2024) — these will frequently suggest outdated commands, wrong package names, and deprecated APIs. Only use them for pure logic/debugging where current information doesn't matter.
 
 **Rule of thumb:** If you're installing packages, using APIs, or working with frameworks released in the last 18 months, use a 2025+ model. For pure logic/debugging tasks where external knowledge is irrelevant, older models are fine.
 
