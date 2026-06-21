@@ -8,14 +8,16 @@ For reliable automation, use a model that can reason step by step and understand
 
 ## Quick Picks
 
-| Use Case | Recommendation | Via |
-|---|---|---|
-| **Best overall** | Claude Sonnet 4 | OpenRouter |
-| **Best free** | Qwen3-Coder-32B | OpenRouter / Ollama / AirLLM |
-| **Best local large** | Llama 3.3 70B Instruct | AirLLM (8 GB VRAM) |
-| **Best coding** | DeepSeek-V3 / Qwen3-Coder-480B | OpenRouter / API |
-| **Cheapest cloud** | DeepSeek-V3 | API ($0.27/M tokens) |
-| **Fast + cheap** | Claude Haiku 3.5 / GPT-4o-mini | OpenRouter / API |
+| Use Case | Recommendation | Via | Why |
+|---|---|---|---|
+| **Best overall** | Claude Sonnet 4 | OpenRouter | Best all-around — reasoning, shell, tool use |
+| **Best free** | Qwen3-Coder-32B | OpenRouter / Ollama / AirLLM | Best open coding model at 32B |
+| **Best local large** | Llama 3.3 70B Instruct | AirLLM (8 GB VRAM) | Strong open model, runs on consumer GPU |
+| **Best coding** | DeepSeek-V3 / Qwen3-Coder-480B | OpenRouter / API | Top-tier code generation |
+| **Cheapest cloud** | DeepSeek-V3 | API ($0.27/M tokens) | MoE — 660B quality at 37B active cost |
+| **Cheapest MoE** | Qwen3-MoE-30B / Mixtral 8x7B | OpenRouter | Sub-$0.30/M, good for simple tasks |
+| **Fast + cheap** | Claude Haiku 3.5 / GPT-4o-mini / Gemini Flash | OpenRouter / API | Sub-second responses, low cost |
+| **Best cost/quality** | Mixtral 8x22B | OpenRouter | 141B MoE — near-top quality at mid pricing |
 
 ---
 
@@ -23,21 +25,90 @@ For reliable automation, use a model that can reason step by step and understand
 
 Cloud models run on powerful remote hardware, require no local GPU, and give you access to the largest models. Even a small cloud model will generally outperform a large local model on OS tasks due to full-precision inference.
 
+### MoE Models — Best Cost-to-Performance on API Credits
+
+**Mixture-of-Experts (MoE)** models contain many "expert" sub-networks but only activate a small fraction per token. This means you get the quality of a massive model at a fraction of the per-token cost. If you're paying per API credit, MoE models are the ideal choice — you pay for active parameters, not total parameters.
+
+| MoE Model | Total Params | Active Per Token | Via | Pricing |
+|---|---|---|---|---|
+| **DeepSeek-V3** | ~660B | ~37B | DeepSeek API / OpenRouter | $0.27/M input, $1.10/M output |
+| **Mixtral 8x22B** | 141B | 39B | OpenRouter / Ollama | ~$0.65/M input |
+| **Mixtral 8x7B** | 47B | 13B | OpenRouter / Ollama | ~$0.25/M input |
+| **Qwen3-MoE-30B** | 30B | 3.7B | OpenRouter | Very cheap |
+| **DBRX 132B** | 132B | 36B | OpenRouter | ~$1.10/M input |
+| **Claude 3.5 Sonnet** | Unknown (MoE) | Unknown | OpenRouter / Anthropic | $3/M input |
+
+**Why MoE for OS automation:** OS tasks require reasoning but not massive token output — commands are typically short. An MoE model gives you the reasoning quality of a 600B+ model while charging you based on ~37B active parameters. On OpenRouter, this can mean 5-10x savings vs. equivalently-capable dense models.
+
+### Dense vs. MoE — Choosing the Right Architecture
+
+| | Dense Models | MoE Models |
+|---|---|---|
+| **How it works** | Every parameter is used for every token | Only a subset of "experts" activate per token |
+| **Examples** | Claude Sonnet 4, GPT-4o, Llama 3.3 70B, Qwen3-Coder-480B | DeepSeek-V3, Mixtral 8x22B, DBRX, Qwen3-MoE |
+
+**Dense models — advantages:**
+- **Consistent quality** — every layer is always active, so output is predictable and uniform across all prompt types
+- **Better at single-domain depth** — all parameters focus on one problem; excels at deeply technical, narrow tasks
+- **Simpler to run locally** — no expert routing overhead; better VRAM predictability
+- **Lower latency** — no gating/routing computation; faster per-token generation at the same active parameter count
+- **Better at creative/lateral thinking** — full model capacity available for unusual prompts that don't fit an expert's specialty
+
+**Dense models — disadvantages:**
+- **Linear cost scaling** — you pay for ALL parameters on every token; a 480B dense model costs per token like a 480B model
+- **High VRAM requirement** — must load entire model; 70B+ dense models need 40 GB+ VRAM even quantized
+- **Diminishing returns** — beyond ~70B, quality gains per parameter slow down while cost keeps climbing
+
+**MoE models — advantages:**
+- **Cost-efficient** — pay for active parameters only (~37B of 660B); 5-10x cheaper than equivalently-capable dense models
+- **Massive total capacity** — 600B+ total knowledge distributed across experts; broad domain coverage
+- **Specialized experts** — different experts handle different domains (code, math, language, reasoning); the right expert activates for each token
+- **Lower VRAM for capability** — a 141B MoE (39B active) fits in less VRAM than a 141B dense model while outperforming it
+
+**MoE models — disadvantages:**
+- **Inconsistent quality** — if the router sends a token to the wrong expert, output quality drops; can produce "expert collision" artifacts
+- **Weaker at narrow depth** — when a task requires sustained focus on one domain, only a fraction of the model is ever engaged
+- **Routing overhead** — adds latency from the gating mechanism; slower at low batch sizes on local hardware
+- **Harder to run locally** — expert sharding across GPUs is complex; many inference engines have limited MoE support
+- **Prompt sensitivity** — MoE models can be more brittle with unusual prompts that don't clearly map to any expert's training distribution
+
+**Guideline:** Use **MoE** when you need broad capability at low cost (general OS automation, diverse tasks, API usage). Use **dense** when you need consistent, deep focus on one domain (complex debugging sessions, long coding chains, creative problem-solving) or when running locally with limited tooling.
+
+**Cost-saving strategy — hybrid MoE + dense workflow:**
+1. Use a cheap **MoE** model (DeepSeek-V3, Mixtral 8x7B) as your primary driver for most tasks
+2. If the MoE model hits a problem it can't fix after 1-2 attempts, switch to a dense model (Claude Sonnet, GPT-4o) for that specific fix
+3. When calling the dense model, **minimize context length** — send only the relevant error, the failing code/command, and a short instruction. Avoid sending full conversation history
+4. Once fixed, switch back to the MoE model for the next steps
+
+This approach keeps the dense model's context window small (reducing per-call cost significantly) while still getting its superior focused reasoning when it's actually needed. You might spend 80% of tokens on cheap MoE and only 20% on dense fixes — cutting total API costs by 3-5x vs. using a dense model for everything.
+
+### All Cloud Models
+
 | Model | Provider | Size | Notes |
 |---|---|---|---|
 | **Claude Sonnet 4** | Anthropic (via OpenRouter) | Unknown | Best all-around — excellent at shell, reasoning, tool use |
+| **Claude 3.5 Sonnet** | Anthropic (via OpenRouter) | Unknown (MoE) | Strong coding, very reliable |
+| **Claude 3.5 Haiku** | Anthropic (via OpenRouter) | Unknown | Fast, cheap, good for simple tasks |
 | **GPT-4o** | OpenAI | Unknown | Strong generalist, good command generation |
-| **DeepSeek-V3** | DeepSeek | ~660B | Very large, competitive with top closed models, cheap |
-| **Qwen3-Coder-480B** | Alibaba (via OpenRouter) | 480B | Specialized for coding — excellent output quality |
-| **Claude Haiku 3.5** | Anthropic (via OpenRouter) | Unknown | Fast, cheap, good for simple tasks |
 | **GPT-4o-mini** | OpenAI | Unknown | Cheapest OpenAI option, decent for quick tasks |
+| **DeepSeek-V3** | DeepSeek | ~660B MoE | Very large, competitive with top closed models, cheap |
+| **DeepSeek-R1** | DeepSeek | ~660B MoE | Reasoning-focused variant of V3 |
+| **Qwen3-Coder-480B** | Alibaba (via OpenRouter) | 480B | Specialized for coding — excellent output quality |
+| **Qwen3-MoE-30B** | Alibaba (via OpenRouter) | 30B MoE | Ultra-cheap MoE, good for simple tasks |
 | **Llama 3.3 70B** | Meta (via OpenRouter) | 70B | Strong open-weight model |
+| **Llama 4 Maverick** | Meta (via OpenRouter) | Unknown (MoE) | Meta's MoE — strong reasoning |
+| **Mistral Large 2** | Mistral (via OpenRouter) | 123B | Top-tier performance, good tool use |
+| **Mixtral 8x22B** | Mistral (via OpenRouter) | 141B MoE | Excellent cost/quality ratio |
+| **Gemini 2.5 Pro** | Google (via OpenRouter) | Unknown | Strong reasoning, 1M context window |
+| **Gemini 2.5 Flash** | Google (via OpenRouter) | Unknown | Fast, cheap, good context handling |
+| **DBRX 132B** | Databricks (via OpenRouter) | 132B MoE | Strong open MoE model |
 
 **API key sources:**
 - [OpenRouter](https://openrouter.ai) — unified access to 200+ models, pay-as-you-go
 - [OpenAI](https://platform.openai.com) — GPT-4o, GPT-4o-mini
 - [DeepSeek](https://platform.deepseek.com) — DeepSeek-V3, DeepSeek-R1
 - [HuggingFace](https://huggingface.co) — Serverless Inference API
+- [Google AI](https://aistudio.google.com) — Gemini models
 
 ---
 
