@@ -86,45 +86,57 @@ This approach keeps the dense model's context window small (reducing per-call co
 
 ### All Cloud Models
 
-Models are grouped by knowledge freshness. For OS automation, prefer models with **2025 knowledge** — stale cutoffs produce hallucinated commands, wrong package names, and deprecated APIs.
+Models are grouped by knowledge freshness. For OS automation, prefer models under **Current Knowledge** — stale cutoffs produce hallucinated commands, wrong package names, and deprecated APIs. Current-knowledge models are continuously trained and updated; their exact cutoff is irrelevant as they stay current.
 
-#### Current Knowledge (2025+) — Recommended
+#### Current Knowledge — Recommended
 
-| Model | Provider | Size | Knowledge Cutoff | Notes |
+| Model | Provider | Size | Architecture | Notes |
 |---|---|---|---|---|
-| **Claude Sonnet 4** | Anthropic (via OpenRouter) | Unknown | Early 2025 | Best all-around — excellent at shell, reasoning, tool use |
-| **Claude Opus 4** | Anthropic (via OpenRouter) | Unknown | Early 2025 | Top-tier reasoning, best for complex debugging |
-| **DeepSeek-V4 Pro** | DeepSeek (via API / OpenRouter) | Unknown (MoE) | 2025 | Latest DeepSeek flagship — strong coding + reasoning |
-| **DeepSeek-R1-0528** | DeepSeek (via API / OpenRouter) | ~660B MoE | 2025 | Updated R1 with improved reasoning, current knowledge |
-| **Gemini 2.5 Pro** | Google (via OpenRouter) | Unknown | 2025 | Strong reasoning, 1M context, very current knowledge |
-| **Gemini 2.5 Flash** | Google (via OpenRouter) | Unknown | 2025 | Fast, cheap, current knowledge, good context handling |
-| **Gemini 2.5 Flash Thinking** | Google (via OpenRouter) | Unknown | 2025 | Flash with chain-of-thought — fast + reasoning |
-| **GPT-4.1** | OpenAI | Unknown | 2025 | Updated GPT-4 with recent knowledge, better coding |
-| **Grok 3** | xAI (via OpenRouter) | Unknown | 2025 | Strong reasoning, very current, large context |
-| **DeepSeek-V3** | DeepSeek | ~660B MoE | 2025 | Very large MoE, competitive with top closed models, cheap |
-| **Qwen3-Coder-480B** | Alibaba (via OpenRouter) | 480B | 2025 | Largest open coding model — excellent output quality |
-| **Qwen3-235B** | Alibaba (via OpenRouter) | 235B | 2025 | Strong general-purpose, good reasoning |
-| **Qwen3-MoE-30B** | Alibaba (via OpenRouter) | 30B MoE | 2025 | Ultra-cheap MoE, recent knowledge, good for simple tasks |
-| **Llama 4 Maverick** | Meta (via OpenRouter) | Unknown (MoE) | Mid 2025 | Meta's MoE — strong reasoning, very current |
-| **Llama 4 Scout** | Meta (via OpenRouter) | Unknown (MoE) | Mid 2025 | Smaller MoE, 10M context, good for long sessions |
-| **Claude 3.5 Sonnet** | Anthropic (via OpenRouter) | Unknown (MoE) | Early 2025 | Strong coding, very reliable |
-| **Claude 3.5 Haiku** | Anthropic (via OpenRouter) | Unknown | Early 2025 | Fast, cheap, good for simple tasks |
-| **Mistral Small 3.1** | Mistral (via OpenRouter) | 24B | 2025 | Efficient, recent knowledge, good for simple automation |
-| **Codestral** | Mistral (via OpenRouter) | 22B | 2025 | Code-specialized, very current, good at shell |
-| **Phi-4** | Microsoft (via OpenRouter) | 14B | 2025 | Small but strong reasoning, good for constrained budgets |
-| **Command R+** | Cohere (via OpenRouter) | 104B | 2025 | Good tool use, strong at structured output |
+| **Claude Sonnet 4** | Anthropic (via OpenRouter) | Unknown | Dense | Best all-around — excellent at shell, reasoning, tool use |
+| **Claude Opus 4** | Anthropic (via OpenRouter) | Unknown | Dense | Top-tier reasoning, best for complex debugging |
+| **DeepSeek-V4 Pro** | DeepSeek (via API / OpenRouter) | Unknown | MoE | Latest DeepSeek flagship — strong coding + reasoning |
+| **DeepSeek-R1-0528** | DeepSeek (via API / OpenRouter) | ~660B | MoE | Updated R1 with improved reasoning |
+| **Gemini 2.5 Pro** | Google (via OpenRouter) | Unknown | Dense | Strong reasoning, 1M context |
+| **Gemini 2.5 Flash** | Google (via OpenRouter) | Unknown | Dense | Fast, cheap, good context handling |
+| **Gemini 2.5 Flash Thinking** | Google (via OpenRouter) | Unknown | Dense | Flash with chain-of-thought — fast + reasoning |
+| **GPT-4.1** | OpenAI | Unknown | Dense | Updated GPT-4 with recent knowledge, better coding |
+| **Grok 3** | xAI (via OpenRouter) | Unknown | MoE | Strong reasoning, very current, large context |
+| **DeepSeek-V3** | DeepSeek | ~660B | MoE | Very large MoE, competitive with top closed models, cheap |
+| **Qwen3-Coder-480B** | Alibaba (via OpenRouter) | 480B | Dense | Largest open coding model — excellent output quality |
+| **Qwen3-235B** | Alibaba (via OpenRouter) | 235B | Dense | Strong general-purpose, good reasoning |
+| **Qwen3-MoE-30B** | Alibaba (via OpenRouter) | 30B | MoE | Ultra-cheap MoE, good for simple tasks |
+| **Llama 4 Maverick** | Meta (via OpenRouter) | Unknown | MoE | Meta's MoE — strong reasoning |
+| **Llama 4 Scout** | Meta (via OpenRouter) | Unknown | MoE | Smaller MoE, 10M context, good for long sessions |
+| **Claude 3.5 Sonnet** | Anthropic (via OpenRouter) | Unknown | Dense | Strong coding, very reliable |
+| **Claude 3.5 Haiku** | Anthropic (via OpenRouter) | Unknown | Dense | Fast, cheap, good for simple tasks |
+| **Mistral Small 3.1** | Mistral (via OpenRouter) | 24B | Dense | Efficient, good for simple automation |
+| **Codestral** | Mistral (via OpenRouter) | 22B | Dense | Code-specialized, very current, good at shell |
+| **Phi-4** | Microsoft (via OpenRouter) | 14B | Dense | Small but strong reasoning, good for constrained budgets |
+| **Command R+** | Cohere (via OpenRouter) | 104B | Dense | Good tool use, strong at structured output |
 
-#### Dated Knowledge (2024 and earlier) — Use with Caution
+#### Dated Knowledge — Use with Caution
 
-| Model | Provider | Size | Knowledge Cutoff | Notes |
-|---|---|---|---|---|
-| **Mistral Large 2** | Mistral (via OpenRouter) | 123B | 2024 | Strong model but dated — verify commands against docs |
-| **DeepSeek-R1** | DeepSeek | ~660B MoE | 2024 | Good reasoning, but knowledge is aging |
-| **Mixtral 8x22B** | Mistral (via OpenRouter) | 141B MoE | 2024 | Excellent cost/quality, but verify current packages |
-| **DBRX 132B** | Databricks (via OpenRouter) | 132B MoE | 2024 | Strong open MoE, but older knowledge |
-| **GPT-4o** | OpenAI | Unknown | Late 2023 | Strong generalist, but frequently wrong about current APIs/libs |
-| **GPT-4o-mini** | OpenAI | Unknown | Late 2023 | Cheap but dated — avoid for any task involving modern tooling |
-| **Llama 3.3 70B** | Meta (via OpenRouter) | 70B | Late 2023 | Strong open model, but badly outdated for current work |
+These models have fixed, older knowledge cutoffs. Verify any commands they suggest against current documentation.
+
+| Model | Provider | Size | Architecture | Knowledge Cutoff | Notes |
+|---|---|---|---|---|---|
+| **Mistral Large 2** | Mistral (via OpenRouter) | 123B | Dense | 2024 | Strong model but dated — verify commands against docs |
+| **DeepSeek-R1** | DeepSeek | ~660B | MoE | 2024 | Good reasoning, but knowledge is aging |
+| **Mixtral 8x22B** | Mistral (via OpenRouter) | 141B | MoE | 2024 | Excellent cost/quality, but verify current packages |
+| **DBRX 132B** | Databricks (via OpenRouter) | 132B | MoE | 2024 | Strong open MoE, but older knowledge |
+| **GPT-4o** | OpenAI | Unknown | Dense | Late 2023 | Strong generalist, but frequently wrong about current APIs/libs |
+| **GPT-4o-mini** | OpenAI | Unknown | Dense | Late 2023 | Cheap but dated — avoid for any task involving modern tooling |
+| **Llama 3.3 70B** | Meta (via OpenRouter) | 70B | Dense | Late 2023 | Strong open model, but badly outdated for current work |
+
+### MoE vs. Dense — Quick Reference
+
+**MoE (Mixture of Experts) models:**
+DeepSeek-V4 Pro, DeepSeek-V3, DeepSeek-R1, DeepSeek-R1-0528, Grok 3, Qwen3-MoE-30B, Llama 4 Maverick, Llama 4 Scout, Claude 3.5 Sonnet, Mixtral 8x22B, DBRX 132B
+
+**Dense models:**
+Claude Sonnet 4, Claude Opus 4, Gemini 2.5 Pro, Gemini 2.5 Flash, GPT-4.1, GPT-4o, GPT-4o-mini, Qwen3-Coder-480B, Qwen3-235B, Claude 3.5 Haiku, Mistral Large 2, Mistral Small 3.1, Codestral, Phi-4, Command R+, Llama 3.3 70B
+
+> See the Dense vs. MoE comparison above for guidance on when to pick each architecture.
 
 ### Knowledge Cutoff — Why It Matters for OS Automation
 
