@@ -10,14 +10,16 @@ For reliable automation, use a model that can reason step by step and understand
 
 | Use Case | Recommendation | Via | Why |
 |---|---|---|---|
-| **Best overall** | Claude Sonnet 4 | OpenRouter | Best all-around — reasoning, shell, tool use |
-| **Best free** | Qwen3-Coder-32B | OpenRouter / Ollama / AirLLM | Best open coding model at 32B |
-| **Best local large** | Llama 3.3 70B Instruct | AirLLM (8 GB VRAM) | Strong open model, runs on consumer GPU |
-| **Best coding** | DeepSeek-V3 / Qwen3-Coder-480B | OpenRouter / API | Top-tier code generation |
-| **Cheapest cloud** | DeepSeek-V3 | API ($0.27/M tokens) | MoE — 660B quality at 37B active cost |
-| **Cheapest MoE** | Qwen3-MoE-30B / Mixtral 8x7B | OpenRouter | Sub-$0.30/M, good for simple tasks |
-| **Fast + cheap** | Claude Haiku 3.5 / GPT-4o-mini / Gemini Flash | OpenRouter / API | Sub-second responses, low cost |
+| **Best overall** | Claude Sonnet 4 / DeepSeek-V4 Pro | OpenRouter / API | Top reasoning + current knowledge, excellent tool use |
+| **Best reasoning** | Claude Opus 4 / DeepSeek-R1-0528 | OpenRouter / API | Deep chain-of-thought, current knowledge |
+| **Best free** | Qwen3-Coder-32B | OpenRouter / Ollama / AirLLM | Best open coding model at 32B, 2025 cutoff |
+| **Best local large** | Llama 3.3 70B Instruct | AirLLM (8 GB VRAM) | Strong open model (note: late 2023 cutoff) |
+| **Best coding** | Qwen3-Coder-480B / DeepSeek-V3 | OpenRouter / API | Top-tier code generation, 2025 knowledge |
+| **Cheapest cloud** | DeepSeek-V3 | API ($0.27/M tokens) | MoE — 660B quality at 37B active cost, 2025 cutoff |
+| **Cheapest current** | Qwen3-MoE-30B / Gemini 2.5 Flash | OpenRouter | Sub-$0.30/M, recent knowledge |
+| **Fast + cheap + current** | Claude Haiku 3.5 / Gemini 2.5 Flash | OpenRouter / API | Sub-second responses, 2025 knowledge |
 | **Best cost/quality** | Mixtral 8x22B | OpenRouter | 141B MoE — near-top quality at mid pricing |
+| **Avoid for current tasks** | GPT-4o / GPT-4o-mini / Llama 3.3 70B | — | Late 2023 cutoff — outdated for modern APIs/libs |
 
 ---
 
@@ -84,24 +86,47 @@ This approach keeps the dense model's context window small (reducing per-call co
 
 ### All Cloud Models
 
-| Model | Provider | Size | Notes |
-|---|---|---|---|
-| **Claude Sonnet 4** | Anthropic (via OpenRouter) | Unknown | Best all-around — excellent at shell, reasoning, tool use |
-| **Claude 3.5 Sonnet** | Anthropic (via OpenRouter) | Unknown (MoE) | Strong coding, very reliable |
-| **Claude 3.5 Haiku** | Anthropic (via OpenRouter) | Unknown | Fast, cheap, good for simple tasks |
-| **GPT-4o** | OpenAI | Unknown | Strong generalist, good command generation |
-| **GPT-4o-mini** | OpenAI | Unknown | Cheapest OpenAI option, decent for quick tasks |
-| **DeepSeek-V3** | DeepSeek | ~660B MoE | Very large, competitive with top closed models, cheap |
-| **DeepSeek-R1** | DeepSeek | ~660B MoE | Reasoning-focused variant of V3 |
-| **Qwen3-Coder-480B** | Alibaba (via OpenRouter) | 480B | Specialized for coding — excellent output quality |
-| **Qwen3-MoE-30B** | Alibaba (via OpenRouter) | 30B MoE | Ultra-cheap MoE, good for simple tasks |
-| **Llama 3.3 70B** | Meta (via OpenRouter) | 70B | Strong open-weight model |
-| **Llama 4 Maverick** | Meta (via OpenRouter) | Unknown (MoE) | Meta's MoE — strong reasoning |
-| **Mistral Large 2** | Mistral (via OpenRouter) | 123B | Top-tier performance, good tool use |
-| **Mixtral 8x22B** | Mistral (via OpenRouter) | 141B MoE | Excellent cost/quality ratio |
-| **Gemini 2.5 Pro** | Google (via OpenRouter) | Unknown | Strong reasoning, 1M context window |
-| **Gemini 2.5 Flash** | Google (via OpenRouter) | Unknown | Fast, cheap, good context handling |
-| **DBRX 132B** | Databricks (via OpenRouter) | 132B MoE | Strong open MoE model |
+Models are ranked roughly by capability. Pay attention to **knowledge cutoff** — a model with a 2023 cutoff won't know about current APIs, library versions, or tooling.
+
+| Model | Provider | Size | Knowledge Cutoff | Notes |
+|---|---|---|---|---|
+| **Claude Sonnet 4** | Anthropic (via OpenRouter) | Unknown | Early 2025 | Best all-around — excellent at shell, reasoning, tool use |
+| **Claude Opus 4** | Anthropic (via OpenRouter) | Unknown | Early 2025 | Top-tier reasoning, best for complex debugging |
+| **DeepSeek-V4 Pro** | DeepSeek (via API / OpenRouter) | Unknown (MoE) | 2025 | Latest DeepSeek flagship — strong coding + reasoning |
+| **DeepSeek-R1-0528** | DeepSeek (via API / OpenRouter) | ~660B MoE | 2025 | Updated R1 with improved reasoning, current knowledge |
+| **Gemini 2.5 Pro** | Google (via OpenRouter) | Unknown | 2025 | Strong reasoning, 1M context, very current knowledge |
+| **GPT-4o** | OpenAI | Unknown | Late 2023 | Strong generalist, but knowledge cutoff is dated — avoid for current APIs/libraries |
+| **GPT-4.1** | OpenAI | Unknown | 2025 | Updated GPT-4 with recent knowledge, better coding |
+| **DeepSeek-V3** | DeepSeek | ~660B MoE | 2025 | Very large MoE, competitive with top closed models, cheap |
+| **DeepSeek-R1** | DeepSeek | ~660B MoE | 2024 | Reasoning-focused variant of V3 |
+| **Qwen3-Coder-480B** | Alibaba (via OpenRouter) | 480B | 2025 | Largest open coding model — excellent output quality |
+| **Claude 3.5 Sonnet** | Anthropic (via OpenRouter) | Unknown (MoE) | Early 2025 | Strong coding, very reliable |
+| **Mistral Large 2** | Mistral (via OpenRouter) | 123B | 2024 | Top-tier performance, good tool use |
+| **Llama 4 Maverick** | Meta (via OpenRouter) | Unknown (MoE) | Mid 2025 | Meta's MoE — strong reasoning, very current |
+| **Llama 3.3 70B** | Meta (via OpenRouter) | 70B | Late 2023 | Strong open-weight model, dated cutoff |
+| **Gemini 2.5 Flash** | Google (via OpenRouter) | Unknown | 2025 | Fast, cheap, current knowledge, good context |
+| **Mixtral 8x22B** | Mistral (via OpenRouter) | 141B MoE | 2024 | Excellent cost/quality ratio |
+| **Claude 3.5 Haiku** | Anthropic (via OpenRouter) | Unknown | Early 2025 | Fast, cheap, good for simple tasks |
+| **GPT-4o-mini** | OpenAI | Unknown | Late 2023 | Cheapest OpenAI option, dated cutoff |
+| **Qwen3-MoE-30B** | Alibaba (via OpenRouter) | 30B MoE | 2025 | Ultra-cheap MoE, recent knowledge, good for simple tasks |
+| **DBRX 132B** | Databricks (via OpenRouter) | 132B MoE | 2024 | Strong open MoE model |
+
+### Knowledge Cutoff — Why It Matters for OS Automation
+
+OS automation relies on current information: package versions, API endpoints, CLI flags, library features, and platform quirks. A model with a stale knowledge cutoff will:
+
+- Hallucinate deprecated flags and removed commands
+- Recommend outdated packages or broken install methods
+- Be unaware of new language features, framework APIs, or security practices
+- Fail silently because it doesn't know what it doesn't know
+
+**Models with 2025+ knowledge (recommended for automation):**
+Claude Sonnet 4, Claude Opus 4, DeepSeek-V4 Pro, DeepSeek-R1-0528, Gemini 2.5 Pro, GPT-4.1, DeepSeek-V3, Qwen3-Coder-480B, Llama 4 Maverick, Qwen3-MoE-30B
+
+**Models to avoid for current-work tasks:**
+GPT-4o (late 2023), GPT-4o-mini (late 2023), Llama 3.3 70B (late 2023) — these will frequently suggest outdated commands, wrong package names, and deprecated APIs for any task involving tools released after 2023.
+
+**Rule of thumb:** If you're installing packages, using APIs, or working with frameworks released in the last 18 months, use a model with a 2025 knowledge cutoff. For pure logic/debugging tasks where current information doesn't matter, older models are fine.
 
 **API key sources:**
 - [OpenRouter](https://openrouter.ai) — unified access to 200+ models, pay-as-you-go
