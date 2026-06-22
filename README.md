@@ -30,12 +30,16 @@ On first run you'll be guided through picking an AI provider and model.
 | **Desktop Automation** | Mouse, keyboard, and window control via pyautogui (`/autotask` mode) |
 | **Program Testing** | Open any program and have the AI test its functionality (`/test`) |
 | **Program Automation** | Use any desktop program to accomplish a task (`/automate`) |
+| **Process Monitoring** | Run a program and capture crash data — exit code, Event Log, output (`/monitor`) |
 | **Autonomous Build** | AI plans, writes code, executes, debugs — no confirmation needed (`/build`, `/fullyauto`) |
-| **Full Autonomy** | AI chooses the right tool (search, browse, autotask, test, automate, code) for each step |
+| **Full Autonomy** | AI chooses the right tool (search, browse, autotask, test, automate, monitor, code) for each step |
 | **Sandbox Testing** | Isolated temporary directory for testing scripts before running them for real (`/sandbox`) |
 | **Structured Plans** | Break complex tasks into numbered steps, track progress (`/plan`, `/status`) |
 | **Web Search** | Live DuckDuckGo search with auto-updating library — triggered by the AI or manually |
 | **Self-Fixing** | AI diagnoses crash/error logs and auto-executes fixes (`/reviewerrorlogs`, `/selffix`) |
+| **Deep Repair** | Full project scan — syntax checks, deps, error logs — AI fixes everything (`/deepfix`) |
+| **Plan Notes** | AI saves goals & progress to disk; resumes where it left off (`/note`, `/takenote`, `/reviewnotes`) |
+| **Conversation Save** | Save/load entire conversation history as JSON (`/saveconversation`, `/loadconversation`) |
 | **Anti-Crash** | Auto-recovers from errors — logs, resets state, restarts up to 3 times before exiting |
 | **Command Logging** | Every shell command logged with timestamp, exit code, and full output |
 | **Error Logging** | All crashes and unhandled errors logged to `error_logs/` for diagnosis |
@@ -85,13 +89,22 @@ pip install airllm bitsandbytes   # optional for 4-bit
 | `/review` | AI inspects recent logs for mistakes |
 | `/reviewerrorlogs` | AI diagnoses crash/error logs AND auto-executes fixes |
 | `/selffix` | Aggressive self-fixing — scans all logs, auto-diagnoses and fixes across 5 turns |
+| `/deepfix` | Deep project-wide repair — scans files, syntax, deps, logs; fixes across 8 turns |
+| `/note <text>` | Save a plan note for later recall |
+| `/takenote <topic>` | AI analyzes a topic and saves a comprehensive note |
+| `/reviewnotes` | AI reviews all plan notes and summarizes goals/progress |
+| `/clearnotes` | Delete all plan note files |
+| `/saveconversation` | Save current conversation to disk (prompts for name) |
+| `/loadconversation` | List and load a previously saved conversation |
+| `/clearconversations` | Delete all saved conversation files |
 | **Modes** | |
 | `/build <desc>` | Auto-build — AI writes + executes autonomously |
-| `/fullyauto [goal]` | Full autonomy — AI controls ALL tools (search, browse, autotask, test, automate, code) |
+| `/fullyauto [goal]` | Full autonomy — AI controls ALL tools (search, browse, autotask, test, automate, monitor, code) |
 | `/browser [--visible] [url]` | Browser automation (Playwright) |
 | `/autotask [program]` | Desktop automation (mouse/keyboard) |
 | `/test <program>` | Open a program and test its functionality |
 | `/automate <program> <task>` | Open a program and automate a task with it |
+| `/monitor <program>` | Run a program and capture crash data for AI diagnosis |
 | `/sandbox [goal]` | Isolated test environment |
 | `/plan <goal>` | Structured step-by-step plan |
 | `/status` | Show plan progress |
@@ -143,7 +156,7 @@ pip install airllm bitsandbytes   # optional for 4-bit
 ```
 assistant/
 ├── main.py                  # Entry point + chat loop + all mode handlers
-├── executor.py              # OS command execution + logging
+├── executor.py              # OS command execution + logging + monitoring
 ├── browser_agent.py         # Playwright browser automation
 ├── autotask_agent.py        # Mouse/keyboard/window control
 ├── planner.py               # Structured task planning
@@ -154,6 +167,8 @@ assistant/
 ├── .gitignore
 ├── command_logs/            # Per-command structured logs
 ├── error_logs/              # Crash and unhandled error logs
+├── plan_notes/              # AI plan notes (persistent memory)
+├── conversations/           # Saved conversation JSON files
 ├── autotask_screenshots/    # Desktop automation screenshots
 ├── browser_screenshots/     # Browser automation screenshots
 └── assistant_core/
