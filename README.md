@@ -52,27 +52,18 @@ On first run you'll be guided through picking an AI provider and model.
 
 ## Providers
 
-The assistant supports 9 AI backends out of the box:
+The assistant supports 4 AI backends:
 
 | # | Provider | Type | Model Management |
 |---|---|---|---|
 | 1 | **Ollama** | Local | Install / remove / list models from the menu |
-| 2 | **LM Studio** | Local | List models via API, install via GUI |
-| 3 | **OpenAI** | Cloud API | Auto-fetches available models from your account |
-| 4 | **DeepSeek** | Cloud API | Auto-fetches available models from your account |
-| 5 | **OpenRouter** | Cloud API | Auto-fetches models — also supports **multi-model orchestration** (3 models) for cost efficiency |
-| 6 | **HuggingFace** | Cloud API | Type model ID (Inference API) |
-| 7 | **AirLLM** | Local | Run 70B+ models on consumer GPU via layer-by-layer offloading |
-| 8 | **OpenCode** | Cloud API | Auto-fetches models from your OpenCode API key |
-| 9 | **Cursor** | Cloud API | Auto-fetches models from your Cursor API key |
+| 2 | **OpenAI** | Cloud API | Auto-fetches available models from your account |
+| 3 | **DeepSeek** | Cloud API | Auto-fetches available models from your account |
+| 4 | **OpenRouter** | Cloud API | Auto-fetches models — also supports **multi-model orchestration** (3 models) for cost efficiency |
 
-### AirLLM — Run Large Models Locally
+### Multi-Model Orchestration
 
-Uses [airllm](https://github.com/lyogavin/airllm) to load models one layer at a time into GPU — a 70B model can run on a laptop with 8 GB VRAM. Pick a model from a local folder, a HuggingFace repo ID, or a download URL. Supports 4-bit compression via bitsandbytes.
-
-```bash
-pip install airllm bitsandbytes   # optional for 4-bit
-```
+With OpenRouter, pick 3 models — a cheap router that classifies task difficulty (easy/medium/hard) and delegates planning + execution to the right model. Easy tasks go to the cheap model, hard tasks to the heavy one — cutting API costs 3-5x.
 
 ---
 
@@ -184,7 +175,7 @@ assistant/
 └── assistant_core/
     ├── __init__.py
     ├── config.json          # Auto-update settings
-    ├── llm.py               # LLM communication (9 providers)
+    ├── llm.py               # LLM communication (Ollama + cloud APIs)
     ├── provider.py          # Provider selection + model management
     ├── platform_utils.py    # OS detection, shell config
     ├── search.py            # DuckDuckGo search
