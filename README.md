@@ -40,6 +40,7 @@ On first run you'll be guided through picking an AI provider and model.
 | **Deep Repair** | Full project scan — syntax checks, deps, error logs — AI fixes everything (`/deepfix`) |
 | **Plan Notes** | AI saves goals & progress to disk; resumes where it left off (`/note`, `/takenote`, `/reviewnotes`) |
 | **Conversation Save** | Save/load entire conversation history as JSON (`/saveconversation`, `/loadconversation`) |
+| **Activity Logging** | Full timeline of every action, tool use, and response (`/reviewactivitylogs`) — AI self-reviews via `[REVIEWACTIVITY]` in fullyauto |
 | **Anti-Crash** | Auto-recovers from errors — logs, resets state, restarts up to 3 times before exiting |
 | **Command Logging** | Every shell command logged with timestamp, exit code, and full output |
 | **Error Logging** | All crashes and unhandled errors logged to `error_logs/` for diagnosis |
@@ -97,9 +98,11 @@ pip install airllm bitsandbytes   # optional for 4-bit
 | `/saveconversation` | Save current conversation to disk (prompts for name) |
 | `/loadconversation` | List and load a previously saved conversation |
 | `/clearconversations` | Delete all saved conversation files |
+| `/reviewactivitylogs` | AI reviews full activity timeline — all actions, tool usage, events |
+| `/clearactivitylogs` | Delete all activity log files |
 | **Modes** | |
 | `/build <desc>` | Auto-build — AI writes + executes autonomously |
-| `/fullyauto [goal]` | Full autonomy — AI controls ALL tools (search, browse, autotask, test, automate, monitor, code) |
+| `/fullyauto [goal]` | Full autonomy — AI controls ALL tools and can use `[REVIEWACTIVITY]` to self-check |
 | `/browser [--visible] [url]` | Browser automation (Playwright) |
 | `/autotask [program]` | Desktop automation (mouse/keyboard) |
 | `/test <program>` | Open a program and test its functionality |
@@ -169,6 +172,7 @@ assistant/
 ├── error_logs/              # Crash and unhandled error logs
 ├── plan_notes/              # AI plan notes (persistent memory)
 ├── conversations/           # Saved conversation JSON files
+├── activity_logs/           # Full activity timeline — every action logged
 ├── autotask_screenshots/    # Desktop automation screenshots
 ├── browser_screenshots/     # Browser automation screenshots
 └── assistant_core/
@@ -193,6 +197,7 @@ For complex OS automation tasks, use larger models. See [`MODEL_RECOMMENDATIONS.
 - **Best free**: Qwen3-Coder-32B via OpenRouter / Ollama / AirLLM
 - **Best local large**: Any 70B+ model via AirLLM (runs on 8 GB VRAM)
 - **Cheapest cloud**: DeepSeek-V3 at $0.27/M tokens
+- **Cost tip**: MoE models (Mixtral, DeepSeek-V3, Qwen3-MoE) activate only a fraction of parameters per token — 5-10x cheaper than equivalently-capable dense models on API credits
 
 ---
 
