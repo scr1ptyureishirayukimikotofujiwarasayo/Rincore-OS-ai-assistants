@@ -40,7 +40,9 @@ On first run you'll be guided through picking an AI provider and model.
 | **Deep Repair** | Full project scan — syntax checks, deps, error logs — AI fixes everything (`/deepfix`) |
 | **Plan Notes** | AI saves goals & progress to disk; resumes where it left off (`/note`, `/takenote`, `/reviewnotes`) |
 | **Conversation Save** | Save/load entire conversation history as JSON (`/saveconversation`, `/loadconversation`) |
-| **Activity Logging** | Full timeline of every action, tool use, and response (`/reviewactivitylogs`) — AI self-reviews via `[REVIEWACTIVITY]` in fullyauto |
+| **Activity Logging** | Full timeline of every action — AI self-reviews via `[REVIEWACTIVITY]` in fullyauto |
+| **Multi-Model Orchestration** | Pick 3 OpenRouter models — router classifies task difficulty, delegates planning + execution to the right model for cost efficiency |
+| **Smart Context** | Auto-compacts conversation when too large — logs state to activity trail, clears old context, AI resumes from activity log without losing place |
 | **Anti-Crash** | Auto-recovers from errors — logs, resets state, restarts up to 3 times before exiting |
 | **Command Logging** | Every shell command logged with timestamp, exit code, and full output |
 | **Error Logging** | All crashes and unhandled errors logged to `error_logs/` for diagnosis |
@@ -50,17 +52,19 @@ On first run you'll be guided through picking an AI provider and model.
 
 ## Providers
 
-The assistant supports 7 AI backends out of the box:
+The assistant supports 9 AI backends out of the box:
 
 | # | Provider | Type | Model Management |
 |---|---|---|---|
 | 1 | **Ollama** | Local | Install / remove / list models from the menu |
-| 2 | **LM Studio** | Local | List models, install via GUI |
-| 3 | **OpenAI** | Cloud API | Fetch available models, or type manually |
-| 4 | **DeepSeek** | Cloud API | Fetch available models, or type manually |
-| 5 | **OpenRouter** | Cloud API | Type model ID (proxies 200+ models: Claude, Llama, Qwen...) |
+| 2 | **LM Studio** | Local | List models via API, install via GUI |
+| 3 | **OpenAI** | Cloud API | Auto-fetches available models from your account |
+| 4 | **DeepSeek** | Cloud API | Auto-fetches available models from your account |
+| 5 | **OpenRouter** | Cloud API | Auto-fetches models — also supports **multi-model orchestration** (3 models) for cost efficiency |
 | 6 | **HuggingFace** | Cloud API | Type model ID (Inference API) |
 | 7 | **AirLLM** | Local | Run 70B+ models on consumer GPU via layer-by-layer offloading |
+| 8 | **OpenCode** | Cloud API | Auto-fetches models from your OpenCode API key |
+| 9 | **Cursor** | Cloud API | Auto-fetches models from your Cursor API key |
 
 ### AirLLM — Run Large Models Locally
 
@@ -73,6 +77,8 @@ pip install airllm bitsandbytes   # optional for 4-bit
 ---
 
 ## Commands
+
+Press `s` at any time during autonomous modes to gracefully stop.
 
 ### Chat Commands
 
@@ -102,7 +108,7 @@ pip install airllm bitsandbytes   # optional for 4-bit
 | `/clearactivitylogs` | Delete all activity log files |
 | **Modes** | |
 | `/build <desc>` | Auto-build — AI writes + executes autonomously |
-| `/fullyauto [goal]` | Full autonomy — AI controls ALL tools and can use `[REVIEWACTIVITY]` to self-check |
+| `/fullyauto [goal]` | Full autonomy — AI controls ALL tools. Press `s` to stop anytime |
 | `/browser [--visible] [url]` | Browser automation (Playwright) |
 | `/autotask [program]` | Desktop automation (mouse/keyboard) |
 | `/test <program>` | Open a program and test its functionality |
@@ -178,7 +184,7 @@ assistant/
 └── assistant_core/
     ├── __init__.py
     ├── config.json          # Auto-update settings
-    ├── llm.py               # LLM communication (7 providers)
+    ├── llm.py               # LLM communication (9 providers)
     ├── provider.py          # Provider selection + model management
     ├── platform_utils.py    # OS detection, shell config
     ├── search.py            # DuckDuckGo search
@@ -197,7 +203,8 @@ For complex OS automation tasks, use larger models. See [`MODEL_RECOMMENDATIONS.
 - **Best free**: Qwen3-Coder-32B via OpenRouter / Ollama / AirLLM
 - **Best local large**: Any 70B+ model via AirLLM (runs on 8 GB VRAM)
 - **Cheapest cloud**: DeepSeek-V3 at $0.27/M tokens
-- **Cost tip**: MoE models (Mixtral, DeepSeek-V3, Qwen3-MoE) activate only a fraction of parameters per token — 5-10x cheaper than equivalently-capable dense models on API credits
+- **Cost tip**: MoE models activate only a fraction of parameters per token — 5-10x cheaper than dense models on API credits
+- **Multi-model tip**: With OpenRouter, pick 3 models (cheap router + mid + heavy) — the assistant auto-routes easy tasks to the cheap model and hard tasks to the heavy one, cutting costs 3-5x
 
 ---
 
