@@ -54,12 +54,12 @@ On first run you'll be guided through picking an AI provider and model.
 
 The assistant supports 4 AI backends:
 
-| # | Provider | Type | Model Management |
+| # | Provider | Type | Notes |
 |---|---|---|---|
 | 1 | **Ollama** | Local | Install / remove / list models from the menu |
-| 2 | **OpenAI** | Cloud API | Auto-fetches available models from your account |
-| 3 | **DeepSeek** | Cloud API | Auto-fetches available models from your account |
-| 4 | **OpenRouter** | Cloud API | Auto-fetches models — also supports **multi-model orchestration** (3 models) for cost efficiency |
+| 2 | **OpenAI** | Cloud API | Auto-fetches models — key saved for reuse |
+| 3 | **DeepSeek** | Cloud API | Auto-fetches models — key saved for reuse |
+| 4 | **OpenRouter** | Cloud API | 200+ models — multi-model orchestration — key saved for reuse |
 
 ### Multi-Model Orchestration
 
@@ -83,7 +83,8 @@ Press `s` at any time during autonomous modes to gracefully stop.
 | `/logs [N]` | Show last N command logs |
 | `/clearcommandlogs` | Delete all command logs |
 | `/clearerrorlogs` | Delete all error logs |
-| `/cleanup` | Clear BOTH command and error logs (Git-ready) |
+| `/clearapikeys` | Delete all saved API keys |
+| `/cleanup` | Clear all logs (command, error, activity, notes) |
 | `/review` | AI inspects recent logs for mistakes |
 | `/reviewerrorlogs` | AI diagnoses crash/error logs AND auto-executes fixes |
 | `/selffix` | Aggressive self-fixing — scans all logs, auto-diagnoses and fixes across 5 turns |
@@ -191,8 +192,8 @@ For complex OS automation tasks, use larger models. See [`MODEL_RECOMMENDATIONS.
 
 **Quick picks:**
 - **Best overall**: Claude Sonnet 4 via OpenRouter
-- **Best free**: Qwen3-Coder-32B via OpenRouter / Ollama / AirLLM
-- **Best local large**: Any 70B+ model via AirLLM (runs on 8 GB VRAM)
+- **Best free**: Qwen3-Coder-32B via OpenRouter / Ollama
+- **Best local**: Any 7B–70B model via Ollama
 - **Cheapest cloud**: DeepSeek-V3 at $0.27/M tokens
 - **Cost tip**: MoE models activate only a fraction of parameters per token — 5-10x cheaper than dense models on API credits
 - **Multi-model tip**: With OpenRouter, pick 3 models (cheap router + mid + heavy) — the assistant auto-routes easy tasks to the cheap model and hard tasks to the heavy one, cutting costs 3-5x
